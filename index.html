@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Fortune Teller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; }
+        #fortune { font-size: 2em; margin-top: 50%; padding: 20px; border: 2px solid #fff; }
+    </style>
+</head>
+<body>
+    <div id="fortune">แตะหน้าจอ หรือ เขย่าเพื่อดูดวง</div>
+
+    <script>
+        const fortunes = ["โชคดีมาก", "วันนี้มีลาภ", "ระวังของหาย", "เจอเนื้อคู่", "ทำงานราบรื่น"];
+        
+        // ฟังก์ชันสุ่ม
+        function shakeFortune() {
+            const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+            document.getElementById('fortune').innerText = randomFortune;
+        }
+
+        // คลิกเพื่อสุ่ม (สำหรับคนไม่อยากเขย่า)
+        document.body.onclick = shakeFortune;
+
+        // โค้ดสำหรับตรวจจับการเขย่า (Shake Event)
+        window.addEventListener('devicemotion', (event) => {
+            let acceleration = event.accelerationIncludingGravity;
+            if (Math.abs(acceleration.x) > 15) { // ถ้าเขย่าแรงพอ
+                shakeFortune();
+            }
+        });
+    </script>
+</body>
+</html>
