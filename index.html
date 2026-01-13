@@ -3,219 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retro Fortune Teller</title>
+    <title>Magic 8 Ball & Daily Fortune</title>
     <style>
-        body {
-            background-color: #222;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Courier New', Courier, monospace;
-        }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
+        
+        /* Animations */
+        @keyframes shake-anim { 0% { transform: translate(0, 0); } 25% { transform: translate(6px, -6px); } 50% { transform: translate(-6px, 6px); } 75% { transform: translate(6px, 6px); } 100% { transform: translate(0, 0); } }
+        @keyframes gold-flash { 0% { background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); } 50% { background: rgba(255, 215, 0, 0.6); box-shadow: 0 0 60px rgba(255, 215, 0, 1); border-color: #ffd700; } 100% { background: rgba(255, 255, 255, 0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.6); } }
+        
+        .shaking { animation: shake-anim 0.1s infinite; }
+        .gold-effect { animation: gold-flash 0.5s 3; }
 
-        /* ตัวเครื่องใส */
-        .device-case {
-            width: 300px;
-            height: 500px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-        }
-
-        /* หน้าจอ E-ink */
-        .screen {
-            width: 240px;
-            height: 240px;
-            background-color: #d8d8d8;
-            border: 10px solid #333;
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            box-sizing: border-box;
-            position: relative;
-        }
-
-        #current-date {
-            width: 100%;
-            color: #555;
-            font-size: 12px;
-            text-align: left;
-            font-weight: bold;
-        }
-
-        #fortune-text {
-            color: #111;
-            font-size: 22px;
-            font-weight: bold;
-            text-align: center;
-            white-space: pre-line;
-            margin-bottom: 20px;
-        }
-
-        /* ปุ่มกด */
-        .button-area {
-            margin-top: 30px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .btn {
-            width: 80px;
-            height: 80px;
-            background: #444;
-            border-radius: 50%;
-            border: none;
-            box-shadow: 0 5px #111;
-            color: white;
-            font-size: 10px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-        }
-
-        .btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px #111;
-        }
-
-        .icon { font-size: 20px; margin-bottom: 5px; }
-
-        /* แผ่นวงจรจำลอง */
-        .circuit-bg {
-            position: absolute;
-            top: 60%;
-            z-index: -1;
-            opacity: 0.15;
-            font-size: 8px;
-            color: #0f0;
-            white-space: pre;
-            pointer-events: none;
-        }
+        .device-case { width: 85vw; max-width: 340px; height: 90vh; max-height: 620px; background: rgba(255, 255, 255, 0.1); border-radius: 30px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 2px solid rgba(255, 255, 255, 0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; position: relative; transition: all 0.3s; }
+        
+        .screen { width: 100%; aspect-ratio: 1 / 1; background-color: #d8d8d8; border: 8px solid #333; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 15px; box-sizing: border-box; box-shadow: inset 0 0 15px rgba(0,0,0,0.2); transition: background-color 0.3s; overflow: hidden; }
+        
+        #current-date { width: 100%; color: #555; font-size: 11px; text-align: left; font-weight: bold; }
+        #fortune-text { color: #111; font-size: clamp(13px, 4.2vw, 17px); font-weight: bold; text-align: center; white-space: pre-line; margin-top: auto; margin-bottom: auto; padding: 5px; line-height: 1.4; width: 100%; }
+        
+        /* Button Layout - ปรับเป็น Grid 3 คอลัมน์สำหรับ 5 ปุ่ม */
+        .button-area { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-content: center; width: 100%; margin-top: 15px; }
+        
+        .btn { width: 100%; aspect-ratio: 1 / 1; background: #444; border-radius: 50%; border: none; box-shadow: 0 5px #111; color: white; font-size: 9px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; -webkit-tap-highlight-color: transparent; padding: 5px; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 1px #111; }
+        .btn.primary { background: #b33939; } /* สีพิเศษสำหรับปุ่มหลัก */
+        
+        .icon { font-size: 18px; margin-bottom: 3px; }
     </style>
 </head>
 <body>
 
-<div class="device-case">
-    <div class="circuit-bg">
-[ SYSTEM READY ]
-[ CPU: A10 FUSION ]
-[ SENSOR: GYRO-01 ]
-[ BATT: 100% ]
-    </div>
-    
-    <div class="screen">
+<div class="device-case" id="main-device">
+    <div class="screen" id="main-screen">
         <div id="current-date">--/--/----</div>
-        <div id="fortune-text">TAP 'START'\nTHEN SHAKE!</div>
+        <div id="fortune-text">ตั้งคำถามในใจ<br>แล้วเริ่มเขย่า!</div>
     </div>
-
     <div class="button-area">
-        <button class="btn" onclick="initSensor()">
-            <span class="icon">🔌</span>START
-        </button>
-        <button class="btn" onclick="getFortune()">
-            <span class="icon">🔮</span>LUCK
-        </button>
-        <button class="btn" onclick="goToMainMenu()">
-            <span class="icon">🏠</span>MENU
-        </button>
-        <button class="btn" onclick="location.reload()">
-            <span class="icon">🔄</span>RESET
-        </button>
+        <button class="btn" onclick="initSensor()"><span class="icon">🔌</span>START</button>
+        <button class="btn primary" onclick="manualTrigger()"><span class="icon">🔮</span>ASK</button>
+        <button class="btn" onclick="showDailyFortune()"><span class="icon">📅</span>DAILY</button>
+        <button class="btn" onclick="goToMainMenu()"><span class="icon">🏠</span>HOME</button>
+        <button class="btn" onclick="location.reload()"><span class="icon">🔄</span>RESET</button>
     </div>
-    
-    <p style="color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 20px;">E-INK EMULATOR v2.0</p>
 </div>
 
 <script>
-    const fortunes = [
-        "大吉 (DAI-KICHI)\nโชคดีที่สุด!",
-        "吉 (KICHI)\nโชคดีนะ",
-        "中吉 (CHU-KICHI)\nโชคดีปานกลาง",
-        "小吉 (SHO-KICHI)\nโชคดีนิดหน่อย",
-        "末吉 (SUE-KICHI)\nพอลุ้นได้",
-        "凶 (KYO)\nระวังตัวนะ!"
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const screen = document.getElementById('main-screen');
+    const device = document.getElementById('main-device');
+    const fortuneDisplay = document.getElementById('fortune-text');
+
+    let isShaking = false;
+    let shakeTimer = null;
+
+    // --- คลังคำตอบ Magic 8 Ball ---
+    const answers = [
+        ["แน่นอนที่สุด", "IT IS CERTAIN"], ["มีโอกาสสูงมาก", "IT IS DECIDEDLY SO"], ["ไม่ต้องสงสัยเลย", "WITHOUT A DOUBT"], ["ใช่แน่นอน", "YES DEFINITELY"], ["พึ่งพาได้เลย", "YOU MAY RELY ON IT"],
+        ["ตามที่ฉันเห็นคือ ใช่", "AS I SEE IT, YES"], ["น่าจะใช่", "MOST LIKELY"], ["สัญญาณดี", "OUTLOOK GOOD"], ["ใช่", "YES"], ["สัญญาณชี้ไปที่ ใช่", "SIGNS POINT TO YES"],
+        ["รอดูจังหวะ", "WAIT FOR THE MOMENT"], ["ยังไม่แน่ชัด", "NOT CLEAR YET"], ["ถามใหม่อีกครั้ง", "ASK AGAIN LATER"], ["ต้องใช้เวลา", "IT TAKES TIME"], ["อยู่กึ่งกลาง", "IN THE MIDDLE"],
+        ["รอดูสถานการณ์", "RE-EVALUATE SOON"], ["ตั้งสมาธิถามใหม่", "CONCENTRATE & ASK"], ["ยังบอกไม่ได้", "CANNOT TELL NOW"], ["อย่าเพิ่งหวัง", "DON'T COUNT ON IT"], ["ดูไม่ค่อยดี", "OUTLOOK NOT GOOD"],
+        ["ยังไม่ใช่ตอนนี้", "NOT AT THIS TIME"], ["คำตอบคือ ไม่", "MY REPLY IS NO"], ["แหล่งข่าวบอกว่าไม่", "SOURCES SAY NO"], ["ยากมาก", "VERY DOUBTFUL"], ["ระวังจะผิดหวัง", "PREPARE FOR NO"],
+        ["เชื่อในสัญชาตญาณ", "TRUST YOUR GUT"], ["ความลับจะถูกเปิดเผย", "SECRETS REVEALED"], ["คุณรู้คำตอบอยู่แล้ว", "YOU ALREADY KNOW"], ["อดทนคือคำตอบ", "PATIENCE IS KEY"], ["ทำตามแผนเดิม", "STICK TO THE PLAN"],
+        ["เปลี่ยนมุมมองใหม่", "NEW PERSPECTIVE"], ["จะได้รับความช่วยเหลือ", "HELP IS COMING"], ["โชคใหญ่อยู่ข้างหน้า", "BIG LUCK AHEAD"], ["ลงมือทำเลย", "ACTION IS NEEDED"], ["ทางสะดวก", "THE WAY IS CLEAR"],
+        ["ระวังคนรอบข้าง", "WATCH THOSE AROUND YOU"], ["รอข่าวดี", "EXPECT GOOD NEWS"], ["เร็วๆ นี้", "VERY SOON"], ["พรุ่งนี้จะชัดเจนกว่า", "TOMORROW IS CLEARER"], ["ยิ้มเข้าไว้", "KEEP SMILING"],
+        ["มันเป็นชะตา", "IT IS DESTINY"], ["เริ่มใหม่ได้เสมอ", "ALWAYS A FRESH START"], ["อย่ากลัว", "DO NOT BE AFRAID"], ["ความสำเร็จรออยู่", "SUCCESS AWAITS"], ["พักผ่อนก่อน", "TAKE A REST FIRST"],
+        ["เวลาจะช่วยเอง", "TIME WILL TELL"], ["ฟังเสียงหัวใจ", "LISTEN TO YOUR HEART"], ["โอกาสมาถึงแล้ว", "OPPORTUNITY KNOCKS"], ["ไม่มีอะไรหยุดคุณได้", "UNSTOPPABLE"], ["เตรียมรับการเปลี่ยนแปลง", "PREPARE FOR CHANGE"],
+        ["มองไปข้างหน้า", "LOOK FORWARD"], ["อย่าหันหลังกลับ", "DON'T LOOK BACK"], ["ทางเลือกที่สองดีกว่า", "SECOND CHOICE IS BETTER"], ["ทุกอย่างจะโอเค", "EVERYTHING WILL BE OK"], ["มันคุ้มค่าที่จะรอ", "WORTH THE WAIT"],
+        ["เดินหน้าต่อ", "MOVE FORWARD"], ["มันไม่ใช่เรื่องบังเอิญ", "NOT A COINCIDENCE"], ["คำตอบอยู่ในใจ", "THE ANSWER IS WITHIN"], ["ระวังคำพูด", "WATCH YOUR WORDS"], ["เปิดใจรับสิ่งใหม่", "OPEN YOUR MIND"],
+        ["เงินกำลังจะมา", "MONEY IS COMING"], ["ความรักกำลังเบ่งบาน", "LOVE IS BLOOMING"], ["รักษาสุขภาพด้วย", "TAKE CARE OF HEALTH"], ["คุณไม่ได้อยู่ลำพัง", "YOU ARE NOT ALONE"], ["หาทางออกได้แน่นอน", "WAY OUT FOUND"],
+        ["ใจเย็นๆ", "BE CALM"], ["ทำวันนี้ให้ดีที่สุด", "DO YOUR BEST TODAY"], ["ผลลัพธ์จะน่าทึ่ง", "AMAZING RESULTS"], ["มีความสุขเข้าไว้", "BE HAPPY"], ["คุณคือผู้ชนะ", "YOU ARE A WINNER"],
+        ["มองโลกในแง่ดี", "BE OPTIMISTIC"], ["อย่าทิ้งความฝัน", "DON'T GIVE UP DREAMS"], ["ฟ้าหลังฝนสวยงาม", "RAINBOW AFTER RAIN"], ["มีโชคจากแดนไกล", "LUCK FROM AFAR"], ["เพื่อนจะช่วยคุณ", "FRIENDS WILL HELP"],
+        ["วันนี้วันของคุณ", "TODAY IS YOUR DAY"], ["ลืมอดีตไปซะ", "FORGET THE PAST"], ["สิ่งดีๆ กำลังเกิด", "GOOD THINGS HAPPENING"], ["จักรวาลอยู่ข้างคุณ", "UNIVERSE IS WITH YOU"], ["คุณเก่งกว่าที่คิด", "STRONGER THAN YOU THINK"],
+        ["ฝันที่เป็นจริง", "DREAMS COME TRUE"], ["ก้าวเล็กๆ ก็สำคัญ", "SMALL STEPS MATTER"], ["เรียนรู้จากความผิดพลาด", "LEARN FROM MISTAKES"], ["อย่าลังเล", "DON'T HESITATE"], ["ไปให้สุดทาง", "GO ALL THE WAY"],
+        ["รางวัลรออยู่", "REWARD AWAITS"], ["หยุดคิดแล้วทำ", "STOP THINKING, DO"], ["ชีวิตคือการผจญภัย", "LIFE IS AN ADVENTURE"], ["คุณเลือกถูกแล้ว", "RIGHT CHOICE MADE"], ["ความจริงจะปรากฏ", "TRUTH WILL APPEAR"],
+        ["รวยแน่นอน", "WEALTH IS COMING"], ["สุขภาพแข็งแรง", "GOOD HEALTH"], ["ครอบครัวอบอุ่น", "HAPPY FAMILY"], ["งานราบรื่น", "SMOOTH WORK"], ["มีเกณฑ์เดินทาง", "TRAVELING SOON"],
+        ["พบมิตรแท้", "FIND TRUE FRIENDS"], ["อุปสรรคจะหายไป", "OBSTACLES VANISH"], ["มีคนคอยสนับสนุน", "SOMEONE SUPPORTS YOU"], ["โชคลาภลอยมา", "LUCK IS FLOATING"], ["ทำบุญบ้างจะดี", "MAKE A MERIT"],
+        ["ปล่อยวางบ้าง", "LET IT BE"], ["ทุกอย่างมีเวลาของมัน", "EVERYTHING HAS TIME"], ["คุณคือคนสำคัญ", "YOU ARE IMPORTANT"], ["จงภูมิใจในตัวเอง", "PROUD OF YOURSELF"], ["สิ่งร้ายจะกลายเป็นดี", "BAD TURNS GOOD"],
+        ["มีความลับที่ยังไม่รู้", "HIDDEN SECRETS"], ["ระวังความใจร้อน", "BEWARE OF IMPATIENCE"], ["เชื่อมั่นในตัวเอง", "BELIEVE IN YOURSELF"], ["ทางตันคือทางเริ่มใหม่", "DEAD END IS A START"], ["แสงสว่างอยู่ที่ปลายอุโมงค์", "LIGHT AT THE TUNNEL"],
+        ["ทุกคำถามมีคำตอบ", "EVERY Q HAS AN A"], ["วันพรุ่งนี้ดีกว่าเดิม", "BETTER TOMORROW"], ["โชคดีรออยู่ที่บ้าน", "LUCK WAITS AT HOME"], ["เลขนำโชคคือ 7", "LUCKY NUMBER IS 7"], ["สีแดงจะนำโชค", "RED BRINGS LUCK"],
+        ["สิ่งที่คุณขอจะสำเร็จ", "REQUEST GRANTED"], ["อย่าละความพยายาม", "NEVER STOP TRYING"], ["ขอบคุณสิ่งที่มี", "BE GRATEFUL"], ["ระวังของหาย", "WATCH YOUR BELONGINGS"], ["จะมีคนมาหา", "VISITOR COMING"],
+        ["ดวงรุ่งพุ่งแรง", "RISING STAR"], ["ชีวิตจะง่ายขึ้น", "LIFE GETS EASIER"], ["มีลาภปาก", "FOOD LUCK COMING"], ["ระวังเรื่องอารมณ์", "CONTROL EMOTIONS"], ["คุณคือแรงบันลานใจ", "YOU ARE INSPIRATION"],
+        ["มองหาโอกาสใหม่", "SEEK NEW CHANCE"], ["จงกล้าหาญ", "BE BRAVE"], ["โลกนี้กว้างใหญ่", "WORLD IS VAST"], ["มิตรภาพคือสมบัติ", "FRIENDSHIP IS TREASURE"], ["ใช้ชีวิตให้คุ้ม", "LIVE LIFE FULLY"],
+        ["โชคลาภมากับน้ำ", "LUCK COMES WITH WATER"], ["ระวังคนแปลกหน้า", "BEWARE STRANGERS"], ["คุณจะได้รับจดหมาย", "MESSAGE COMING"], ["ของเดิมดีอยู่แล้ว", "OLD IS GOLD"], ["ลองสิ่งใหม่บ้าง", "TRY NEW THINGS"],
+        ["วันนี้เหมาะกับการลงทุน", "GOOD FOR INVEST"], ["โชคมาจากเด็ก", "LUCK FROM CHILDREN"], ["จะมีโชคใหญ่ตอนกลางคืน", "NIGHT LUCK COMING"], ["ทำจิตใจให้สงบ", "CALM YOUR MIND"], ["ระวังความเข้าใจผิด", "AVOID MISUNDERSTAND"],
+        ["ความพยายามอยู่ที่ไหน...", "SUCCESS IS NEAR"], ["มีคนคิดถึงคุณ", "SOMEONE MISSES YOU"], ["ฝันจะบอกเหตุ", "DREAMS WILL TELL"], ["อย่าเชื่อคนง่าย", "DON'T TRUST EASILY"], ["มีข่าวดีเรื่องบ้าน", "HOUSE GOOD NEWS"],
+        ["โชคลาภมาจากผู้ใหญ่", "LUCK FROM ELDERS"], ["จงอดทนอีกนิด", "WAIT A BIT MORE"], ["ความรักอยู่รอบตัว", "LOVE IS AROUND"], ["คุณจะโด่งดัง", "YOU WILL BE FAMOUS"], ["อย่าลืมสัญญา", "KEEP THE PROMISE"],
+        ["เงินจะไหลมาเทมา", "CASH FLOWING IN"], ["มีความสุขกับสิ่งเล็กๆ", "SMALL JOY"], ["วันนี้ห้ามโกรธ", "NO ANGER TODAY"], ["เลขนำโชคคือ 1", "LUCKY NUMBER IS 1"], ["ดวงกำลังขึ้น", "DOUBLING LUCK"],
+        ["ระวังอุบัติเหตุเล็กๆ", "CAREFUL ACCIDENTS"], ["วันนี้มีเกณฑ์เสียเงิน", "EXPENSES COMING"], ["จะได้เพื่อนใหม่", "NEW FRIEND MADE"], ["มีโชคจากการเดินทาง", "LUCK FROM TRAVEL"], ["จงเป็นตัวของตัวเอง", "BE YOURSELF"],
+        ["ความฝันจะเป็นจริง", "DREAM TO REALITY"], ["อย่าหยุดฝัน", "NEVER STOP DREAMING"], ["จะมีคนให้ของขวัญ", "GIFT COMING"], ["โชคลาภมาจากทิศเหนือ", "LUCK FROM NORTH"], ["ทิศใต้จะให้โชค", "SOUTH IS LUCKY"],
+        ["ทิศตะวันออกดีที่สุด", "EAST IS BEST"], ["ทิศตะวันตกนำโชค", "WEST IS LUCKY"], ["แต่งตัวสวยๆ ไว้", "DRESS TO IMPRESS"], ["ความดีจะคุ้มครอง", "GOODNESS PROTECTS"], ["วันนี้จะมีรอยยิ้ม", "SMILE TODAY"],
+        ["มีเกณฑ์ได้ลาภลอย", "WINDFALL LUCK"], ["ระวังคำนินทา", "WATCH THE GOSSIP"], ["อย่าคิดมาก", "DON'T OVERTHINK"], ["ปล่อยให้เป็นไปตามดวง", "LET IT BE LUCK"], ["คุณได้รับความรัก", "YOU ARE LOVED"],
+        ["ดวงงานโดดเด่น", "WORK IS SHINING"], ["ดวงรักพุ่งแรง", "LOVE IS STRONG"], ["ดวงเงินมหาศาล", "WEALTH IS HUGE"], ["จงเชื่อใจคู่รัก", "TRUST YOUR PARTNER"], ["ความสุขรออยู่หน้าบ้าน", "JOY AT DOORSTEP"],
+        ["จะได้ของที่อยากได้", "GET WHAT YOU WANT"], ["เลขนำโชคคือ 5", "LUCKY NUMBER IS 5"], ["สีนำโชคคือสีเขียว", "GREEN IS LUCKY"], ["สีฟ้าจะพาโชคมา", "BLUE BRINGS LUCK"], ["ระวังเสียใจภายหลัง", "AVOID REGRET"],
+        ["วันนี้คือจุดเริ่มต้น", "TODAY IS START"], ["คุณคือแสงสว่าง", "YOU ARE THE LIGHT"], ["จงแบ่งปัน", "SHARE THE LUCK"], ["โชคจะคูณสอง", "DOUBLE LUCK"], ["ยินดีด้วย!", "CONGRATULATIONS!"]
     ];
+
+    // --- ระบบเสียง ---
+    function playBeep(freq, type, duration) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playShakeSound() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(100 + Math.random() * 200, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    // --- ระบบ Magic 8 Ball ---
+    function showResult() {
+        isShaking = false;
+        device.classList.remove('shaking');
+        fortuneDisplay.innerText = "กำลังคิด...";
+        
+        setTimeout(() => {
+            const rand = answers[Math.floor(Math.random() * answers.length)];
+            fortuneDisplay.innerText = `${rand[0]}\n\n---\n\n${rand[1]}`;
+            
+            if (Math.random() > 0.9) {
+                device.classList.add('gold-effect');
+                setTimeout(() => device.classList.remove('gold-effect'), 1500);
+                playBeep(1000, 'square', 0.2);
+                setTimeout(() => playBeep(1500, 'square', 0.4), 200);
+            } else {
+                playBeep(1200, 'square', 0.2);
+            }
+            updateDate();
+        }, 800);
+    }
+
+    function startShake() {
+        if (!isShaking) {
+            isShaking = true;
+            device.classList.add('shaking');
+            fortuneDisplay.innerText = "เขย่าไปเรื่อยๆ...";
+        }
+        playShakeSound();
+        clearTimeout(shakeTimer);
+        shakeTimer = setTimeout(showResult, 600);
+    }
+
+    // --- ระบบ Daily Fortune ---
+    function showDailyFortune() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        playBeep(800, 'sine', 0.2);
+        
+        const now = new Date();
+        const dateSeed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+        
+        // ฟังก์ชันสุ่มแบบล็อคผลตาม Seed
+        function seededRandom(seed) {
+            var x = Math.sin(seed) * 10000;
+            return x - Math.floor(x);
+        }
+
+        const emojis = ["😫", "😟", "😐", "🙂", "🤩"];
+        const topics = [
+            { label: "❤️ LOVE",  id: 101 },
+            { label: "💰 MONEY", id: 202 },
+            { label: "✈️ TRAVEL", id: 303 },
+            { label: "💪 HEALTH", id: 404 }
+        ];
+
+        let resultText = "✨ ดวงรายวัน ✨\n";
+        topics.forEach(t => {
+            const score = Math.floor(seededRandom(dateSeed + t.id) * 5);
+            resultText += `\n${t.label}: ${emojis[score]}`;
+        });
+
+        fortuneDisplay.innerText = resultText;
+        updateDate();
+    }
+
+    // --- เซนเซอร์และการควบคุม ---
+    function initSensor() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        playBeep(800, 'square', 0.1);
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+            DeviceMotionEvent.requestPermission().then(state => {
+                if (state === 'granted') window.addEventListener('devicemotion', detectShake);
+            });
+        } else { window.addEventListener('devicemotion', detectShake); }
+        fortuneDisplay.innerText = "เชื่อมต่อแล้ว!\nเริ่มเขย่าได้";
+    }
+
+    function detectShake(e) {
+        let acc = e.accelerationIncludingGravity;
+        if (Math.abs(acc.x) > 15 || Math.abs(acc.y) > 15) {
+            startShake();
+        }
+    }
+
+    function manualTrigger() {
+        startShake();
+    }
 
     function updateDate() {
         const now = new Date();
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        document.getElementById('current-date').innerText = now.toLocaleDateString('th-TH', options);
+        document.getElementById('current-date').innerText = now.toLocaleDateString('th-TH', options).toUpperCase();
     }
 
     function goToMainMenu() {
-        document.getElementById('fortune-text').innerText = "SHAKE ME\nTO SEE LUCK";
-        updateDate();
-    }
-
-    function getFortune() {
-        const textElement = document.getElementById('fortune-text');
-        textElement.style.opacity = "0.3"; // เอฟเฟกต์กระพริบแบบ E-ink
-        textElement.innerText = "WAITING...";
-        
-        setTimeout(() => {
-            const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-            textElement.innerText = randomFortune;
-            textElement.style.opacity = "1";
-            updateDate();
-        }, 600);
-    }
-
-    // ฟังก์ชันสำคัญ: เปิดการทำงาน Sensor สำหรับ iPhone
-    function initSensor() {
-        if (typeof DeviceMotionEvent.requestPermission === 'function') {
-            // กรณี iOS 13 ขึ้นไป
-            DeviceMotionEvent.requestPermission()
-                .then(permissionState => {
-                    if (permissionState === 'granted') {
-                        startShakeDetection();
-                        alert("เซนเซอร์เชื่อมต่อแล้ว! เริ่มเขย่าได้เลย");
-                    } else {
-                        alert("คุณต้องอนุญาตการเข้าถึงเซนเซอร์ถึงจะเขย่าได้ครับ");
-                    }
-                })
-                .catch(console.error);
-        } else {
-            // กรณี Android หรือ iOS รุ่นเก่า
-            startShakeDetection();
-            alert("เริ่มเขย่าได้เลย!");
-        }
-    }
-
-    let lastShake = 0;
-    function startShakeDetection() {
-        window.addEventListener('devicemotion', (event) => {
-            let acc = event.accelerationIncludingGravity;
-            let now = Date.now();
-            
-            // ตรวจสอบความแรงการเขย่า
-            if (Math.abs(acc.x) > 15 || Math.abs(acc.y) > 15) {
-                if (now - lastShake > 2000) { // เว้นช่วง 2 วินาทีต่อการเขย่า
-                    getFortune();
-                    lastShake = now;
-                }
-            }
-        });
+        playBeep(600, 'sine', 0.1);
+        fortuneDisplay.innerText = "ตั้งคำถามในใจ\nแล้วเริ่มเขย่า!";
     }
 
     window.onload = updateDate;
 </script>
-
 </body>
 </html>
