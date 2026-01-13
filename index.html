@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Retro Fortune Teller</title>
     <style>
-        /* สไตล์พื้นหลังและตัวเครื่อง */
         body {
             background-color: #222;
             display: flex;
@@ -17,10 +16,10 @@
             font-family: 'Courier New', Courier, monospace;
         }
 
-        /* ตัวเครื่องใส (Frosted Glass Effect) */
+        /* ตัวเครื่องใส */
         .device-case {
             width: 300px;
-            height: 480px; /* เพิ่มความสูงเล็กน้อยเพื่อรองรับวันที่ */
+            height: 500px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             backdrop-filter: blur(10px);
@@ -37,84 +36,77 @@
         .screen {
             width: 240px;
             height: 240px;
-            background-color: #d8d8d8; /* สีจอ E-ink */
+            background-color: #d8d8d8;
             border: 10px solid #333;
             border-radius: 5px;
             display: flex;
-            flex-direction: column; /* เพื่อจัดเรียงวันที่และคำทำนาย */
-            justify-content: space-between; /* ให้วันที่อยู่บน คำทำนายอยู่กลาง */
+            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            padding: 10px;
+            padding: 15px;
             box-sizing: border-box;
             position: relative;
         }
 
         #current-date {
-            position: absolute; /* วางไว้มุมบนซ้ายของจอ */
-            top: 5px;
-            left: 5px;
-            color: #555; /* สีเทาเข้มหน่อย */
-            font-size: 10px;
+            width: 100%;
+            color: #555;
+            font-size: 12px;
             text-align: left;
-            width: 90%;
-            white-space: nowrap; /* ไม่ให้วันที่ขึ้นบรรทัดใหม่ */
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-weight: bold;
         }
 
         #fortune-text {
             color: #111;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
             text-align: center;
-            text-transform: uppercase;
-            margin-top: 20px; /* ขยับลงมาหน่อยไม่ให้ทับวันที่ */
+            white-space: pre-line;
+            margin-bottom: 20px;
         }
 
         /* ปุ่มกด */
         .button-area {
-            margin-top: 40px;
-            display: flex;
-            gap: 20px;
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         .btn {
-            width: 70px; /* เพิ่มขนาดปุ่มเล็กน้อย */
-            height: 70px;
+            width: 80px;
+            height: 80px;
             background: #444;
             border-radius: 50%;
             border: none;
-            box-shadow: 0 5px #222;
+            box-shadow: 0 5px #111;
             color: white;
             font-size: 10px;
             cursor: pointer;
-            display: flex; /* จัดให้ข้อความ/ไอคอนอยู่ตรงกลาง */
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-decoration: none; /* ไม่มีขีดเส้นใต้ */
-            position: relative;
-        }
-         /* Icon สำหรับปุ่ม */
-        .btn .icon {
-            font-size: 24px; /* ขนาดไอคอน */
-            margin-bottom: 2px;
-        }
-        
-        .btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px #222;
+            font-weight: bold;
         }
 
-        /* แผ่นวงจรจำลองด้านหลัง */
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px #111;
+        }
+
+        .icon { font-size: 20px; margin-bottom: 5px; }
+
+        /* แผ่นวงจรจำลอง */
         .circuit-bg {
             position: absolute;
-            top: 50%;
+            top: 60%;
             z-index: -1;
-            opacity: 0.2;
+            opacity: 0.15;
             font-size: 8px;
-            color: green;
+            color: #0f0;
             white-space: pre;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -122,42 +114,108 @@
 
 <div class="device-case">
     <div class="circuit-bg">
-        [ CPU: ESP32-S3 ]
-        [ ROM: 16MB    ]
-        [ RAM: 8MB     ]
-        [ WIFI: ENABLE ]
+[ SYSTEM READY ]
+[ CPU: A10 FUSION ]
+[ SENSOR: GYRO-01 ]
+[ BATT: 100% ]
     </div>
     
     <div class="screen">
-        <div id="current-date"></div>
-        <div id="fortune-text">SHAKE ME!</div>
+        <div id="current-date">--/--/----</div>
+        <div id="fortune-text">TAP 'START'\nTHEN SHAKE!</div>
     </div>
 
     <div class="button-area">
+        <button class="btn" onclick="initSensor()">
+            <span class="icon">🔌</span>START
+        </button>
         <button class="btn" onclick="getFortune()">
-            <span class="icon">&#9658;</span> OK
+            <span class="icon">🔮</span>LUCK
         </button>
         <button class="btn" onclick="goToMainMenu()">
-            <span class="icon">&#9776;</span> MENU
+            <span class="icon">🏠</span>MENU
+        </button>
+        <button class="btn" onclick="location.reload()">
+            <span class="icon">🔄</span>RESET
         </button>
     </div>
     
-    <p style="color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 20px;">E-INK SIMULATOR</p>
+    <p style="color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 20px;">E-INK EMULATOR v2.0</p>
 </div>
 
 <script>
-    // คำทำนาย
     const fortunes = [
-        "大吉 (DAI-KICHI)\nโชคดีที่สุด",
-        "吉 (KICHI)\nโชคดี",
+        "大吉 (DAI-KICHI)\nโชคดีที่สุด!",
+        "吉 (KICHI)\nโชคดีนะ",
         "中吉 (CHU-KICHI)\nโชคดีปานกลาง",
-        "小吉 (SHO-KICHI)\nโชคดีเล็กน้อย",
-        "末吉 (SUE-KICHI)\nโชคนิดหน่อย",
-        "凶 (KYO)\nระวังตัวด้วย!"
+        "小吉 (SHO-KICHI)\nโชคดีนิดหน่อย",
+        "末吉 (SUE-KICHI)\nพอลุ้นได้",
+        "凶 (KYO)\nระวังตัวนะ!"
     ];
 
-    // ฟังก์ชันแสดงวันที่
-    function displayCurrentDate() {
-        const dateElement = document.getElementById('current-date');
+    function updateDate() {
         const now = new Date();
-        const options = { year: 'numeric', month: 'short', day: '
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        document.getElementById('current-date').innerText = now.toLocaleDateString('th-TH', options);
+    }
+
+    function goToMainMenu() {
+        document.getElementById('fortune-text').innerText = "SHAKE ME\nTO SEE LUCK";
+        updateDate();
+    }
+
+    function getFortune() {
+        const textElement = document.getElementById('fortune-text');
+        textElement.style.opacity = "0.3"; // เอฟเฟกต์กระพริบแบบ E-ink
+        textElement.innerText = "WAITING...";
+        
+        setTimeout(() => {
+            const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+            textElement.innerText = randomFortune;
+            textElement.style.opacity = "1";
+            updateDate();
+        }, 600);
+    }
+
+    // ฟังก์ชันสำคัญ: เปิดการทำงาน Sensor สำหรับ iPhone
+    function initSensor() {
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+            // กรณี iOS 13 ขึ้นไป
+            DeviceMotionEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        startShakeDetection();
+                        alert("เซนเซอร์เชื่อมต่อแล้ว! เริ่มเขย่าได้เลย");
+                    } else {
+                        alert("คุณต้องอนุญาตการเข้าถึงเซนเซอร์ถึงจะเขย่าได้ครับ");
+                    }
+                })
+                .catch(console.error);
+        } else {
+            // กรณี Android หรือ iOS รุ่นเก่า
+            startShakeDetection();
+            alert("เริ่มเขย่าได้เลย!");
+        }
+    }
+
+    let lastShake = 0;
+    function startShakeDetection() {
+        window.addEventListener('devicemotion', (event) => {
+            let acc = event.accelerationIncludingGravity;
+            let now = Date.now();
+            
+            // ตรวจสอบความแรงการเขย่า
+            if (Math.abs(acc.x) > 15 || Math.abs(acc.y) > 15) {
+                if (now - lastShake > 2000) { // เว้นช่วง 2 วินาทีต่อการเขย่า
+                    getFortune();
+                    lastShake = now;
+                }
+            }
+        });
+    }
+
+    window.onload = updateDate;
+</script>
+
+</body>
+</html>
