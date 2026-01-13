@@ -1,35 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-    <title>AI Fortune Teller</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retro Fortune Teller</title>
     <style>
-        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; }
-        #fortune { font-size: 2em; margin-top: 50%; padding: 20px; border: 2px solid #fff; }
+        /* สไตล์พื้นหลังและตัวเครื่อง */
+        body {
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* ตัวเครื่องใส (Frosted Glass Effect) */
+        .device-case {
+            width: 300px;
+            height: 480px; /* เพิ่มความสูงเล็กน้อยเพื่อรองรับวันที่ */
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* หน้าจอ E-ink */
+        .screen {
+            width: 240px;
+            height: 240px;
+            background-color: #d8d8d8; /* สีจอ E-ink */
+            border: 10px solid #333;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column; /* เพื่อจัดเรียงวันที่และคำทำนาย */
+            justify-content: space-between; /* ให้วันที่อยู่บน คำทำนายอยู่กลาง */
+            align-items: center;
+            padding: 10px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        #current-date {
+            position: absolute; /* วางไว้มุมบนซ้ายของจอ */
+            top: 5px;
+            left: 5px;
+            color: #555; /* สีเทาเข้มหน่อย */
+            font-size: 10px;
+            text-align: left;
+            width: 90%;
+            white-space: nowrap; /* ไม่ให้วันที่ขึ้นบรรทัดใหม่ */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #fortune-text {
+            color: #111;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            margin-top: 20px; /* ขยับลงมาหน่อยไม่ให้ทับวันที่ */
+        }
+
+        /* ปุ่มกด */
+        .button-area {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            width: 70px; /* เพิ่มขนาดปุ่มเล็กน้อย */
+            height: 70px;
+            background: #444;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 5px #222;
+            color: white;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex; /* จัดให้ข้อความ/ไอคอนอยู่ตรงกลาง */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none; /* ไม่มีขีดเส้นใต้ */
+            position: relative;
+        }
+         /* Icon สำหรับปุ่ม */
+        .btn .icon {
+            font-size: 24px; /* ขนาดไอคอน */
+            margin-bottom: 2px;
+        }
+        
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px #222;
+        }
+
+        /* แผ่นวงจรจำลองด้านหลัง */
+        .circuit-bg {
+            position: absolute;
+            top: 50%;
+            z-index: -1;
+            opacity: 0.2;
+            font-size: 8px;
+            color: green;
+            white-space: pre;
+        }
     </style>
 </head>
 <body>
-    <div id="fortune">แตะหน้าจอ หรือ เขย่าเพื่อดูดวง</div>
 
-    <script>
-        const fortunes = ["โชคดีมาก", "วันนี้มีลาภ", "ระวังของหาย", "เจอเนื้อคู่", "ทำงานราบรื่น"];
-        
-        // ฟังก์ชันสุ่ม
-        function shakeFortune() {
-            const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-            document.getElementById('fortune').innerText = randomFortune;
-        }
+<div class="device-case">
+    <div class="circuit-bg">
+        [ CPU: ESP32-S3 ]
+        [ ROM: 16MB    ]
+        [ RAM: 8MB     ]
+        [ WIFI: ENABLE ]
+    </div>
+    
+    <div class="screen">
+        <div id="current-date"></div>
+        <div id="fortune-text">SHAKE ME!</div>
+    </div>
 
-        // คลิกเพื่อสุ่ม (สำหรับคนไม่อยากเขย่า)
-        document.body.onclick = shakeFortune;
+    <div class="button-area">
+        <button class="btn" onclick="getFortune()">
+            <span class="icon">&#9658;</span> OK
+        </button>
+        <button class="btn" onclick="goToMainMenu()">
+            <span class="icon">&#9776;</span> MENU
+        </button>
+    </div>
+    
+    <p style="color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 20px;">E-INK SIMULATOR</p>
+</div>
 
-        // โค้ดสำหรับตรวจจับการเขย่า (Shake Event)
-        window.addEventListener('devicemotion', (event) => {
-            let acceleration = event.accelerationIncludingGravity;
-            if (Math.abs(acceleration.x) > 15) { // ถ้าเขย่าแรงพอ
-                shakeFortune();
-            }
-        });
-    </script>
-</body>
-</html>
+<script>
+    // คำทำนาย
+    const fortunes = [
+        "大吉 (DAI-KICHI)\nโชคดีที่สุด",
+        "吉 (KICHI)\nโชคดี",
+        "中吉 (CHU-KICHI)\nโชคดีปานกลาง",
+        "小吉 (SHO-KICHI)\nโชคดีเล็กน้อย",
+        "末吉 (SUE-KICHI)\nโชคนิดหน่อย",
+        "凶 (KYO)\nระวังตัวด้วย!"
+    ];
+
+    // ฟังก์ชันแสดงวันที่
+    function displayCurrentDate() {
+        const dateElement = document.getElementById('current-date');
+        const now = new Date();
+        const options = { year: 'numeric', month: 'short', day: '
